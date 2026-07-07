@@ -5,7 +5,7 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
   background: #f5f5f5;
   color: #333;
 }
@@ -17,15 +17,16 @@ body {
 }
 
 .app-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 20px;
+  background: white;
+  padding: 15px;
   text-align: center;
+  border-bottom: 2px solid #ddd;
 }
 
-.app-header h1 {
-  font-size: 28px;
-  font-weight: 600;
+.header-image {
+  max-width: 100%;
+  height: auto;
+  max-height: 120px;
 }
 
 .step-nav {
@@ -49,6 +50,11 @@ body {
   transition: all 0.3s ease;
 }
 
+.step-btn:hover {
+  border-color: #667eea;
+  color: #667eea;
+}
+
 .step-btn.active {
   background: #667eea;
   color: white;
@@ -58,7 +64,7 @@ body {
 .step-container {
   flex: 1;
   padding: 40px 20px;
-  max-width: 900px;
+  max-width: 1000px;
   margin: 0 auto;
   width: 100%;
 }
@@ -68,6 +74,12 @@ body {
   padding: 30px;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .step h2 {
@@ -80,6 +92,13 @@ body {
   color: #333;
   margin-top: 20px;
   margin-bottom: 15px;
+  font-size: 18px;
+}
+
+.step p {
+  margin: 10px 0;
+  line-height: 1.6;
+  color: #555;
 }
 
 label {
@@ -88,10 +107,12 @@ label {
   margin-bottom: 8px;
   font-weight: 500;
   color: #333;
+  font-size: 14px;
 }
 
 input[type="text"],
 input[type="number"],
+input[type="file"],
 select,
 textarea {
   width: 100%;
@@ -100,11 +121,27 @@ textarea {
   border-radius: 6px;
   font-size: 14px;
   font-family: inherit;
+  transition: border-color 0.3s ease;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="file"]:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 textarea {
   resize: vertical;
   min-height: 100px;
+}
+
+input[type="file"] {
+  padding: 10px;
+  cursor: pointer;
 }
 
 .rooms-grid {
@@ -121,6 +158,12 @@ textarea {
   border: 1px solid #ddd;
   border-radius: 6px;
   cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.room-checkbox:hover {
+  background: #f9f9f9;
+  border-color: #667eea;
 }
 
 .room-checkbox input {
@@ -145,10 +188,63 @@ textarea {
   margin-top: 15px;
 }
 
+.equipment-item {
+  display: flex;
+  flex-direction: column;
+}
+
 .equipment-item label {
   margin-top: 0;
   margin-bottom: 6px;
   font-size: 13px;
+}
+
+.equipment-item select {
+  margin: 0;
+}
+
+.photos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+  margin-top: 15px;
+}
+
+.photo-item {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.photo-item img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  display: block;
+}
+
+.photo-item button {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: rgba(255, 0, 0, 0.8);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+
+.photo-item button:hover {
+  background: rgba(255, 0, 0, 1);
 }
 
 .meter-section {
@@ -156,6 +252,32 @@ textarea {
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 20px;
   margin-top: 20px;
+}
+
+.meter-section > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.keys-section {
+  margin-top: 30px;
+  padding: 20px;
+  background: #f0f4ff;
+  border-radius: 8px;
+  border-left: 4px solid #667eea;
+}
+
+.keys-photo {
+  margin-top: 15px;
+  max-width: 300px;
+}
+
+.keys-photo img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  margin-bottom: 10px;
 }
 
 .signature-section {
@@ -171,6 +293,18 @@ textarea {
   width: 100%;
   max-width: 400px;
   height: 150px;
+  cursor: crosshair;
+}
+
+.signature-canvas:hover {
+  border-color: #667eea;
+}
+
+.signature-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+  flex-wrap: wrap;
 }
 
 .pdf-preview {
@@ -181,6 +315,15 @@ textarea {
   border: 1px solid #ddd;
 }
 
+.pdf-preview h3 {
+  margin-top: 0;
+}
+
+.pdf-preview iframe {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
 .step-actions {
   display: flex;
   justify-content: center;
@@ -188,6 +331,7 @@ textarea {
   padding: 20px;
   background: white;
   border-top: 1px solid #e0e0e0;
+  flex-wrap: wrap;
 }
 
 button {
@@ -205,9 +349,71 @@ button {
 button:hover {
   background: #667eea;
   color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
-p {
-  margin: 10px 0;
-  line-height: 1.6;
+button:active {
+  transform: translateY(0);
+}
+
+.btn-primary {
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
+}
+
+.btn-primary:hover {
+  background: #5568d3;
+  border-color: #5568d3;
+}
+
+strong {
+  color: #333;
+}
+
+a {
+  text-decoration: none;
+}
+
+@media (max-width: 768px) {
+  .step-container {
+    padding: 20px 15px;
+  }
+
+  .step {
+    padding: 20px;
+  }
+
+  .step-nav {
+    flex-direction: column;
+  }
+
+  .step-btn {
+    width: 100%;
+  }
+
+  .rooms-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .equipment-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .meter-section {
+    grid-template-columns: 1fr;
+  }
+
+  .step-actions {
+    flex-direction: column;
+  }
+
+  button {
+    width: 100%;
+  }
+
+  .signature-canvas {
+    max-width: 100%;
+  }
 }
