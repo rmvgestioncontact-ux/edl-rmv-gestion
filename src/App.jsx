@@ -210,7 +210,7 @@ function Step2({ formData, updateFormData }) {
             <div className="photos-grid">
               {formData.rooms[room].photos.map((photo, idx) => (
                 <div key={idx} className="photo-item">
-                  <img src="/images/header.png" className="header-image" />
+                  <img src="/images/header.png" alt="" className="header-image" />
                   <button onClick={() => removePhoto(room, idx)}>✕</button>
                 </div>
               ))}
