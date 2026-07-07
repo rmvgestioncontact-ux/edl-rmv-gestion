@@ -29,7 +29,7 @@ export default function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <img src="/Screenshot 2026-07-04 225530_edited.png" alt="RMV GESTION" className="header-image" />
+        <img src="/Screenshot 2026-07-04 225530_edited.png" alt="" className="header-image" />
       </header>
       
       <nav className="step-nav">
@@ -71,28 +71,13 @@ function Step1({ formData, updateFormData }) {
       </select>
 
       <label>Adresse du bien :</label>
-      <input 
-        type="text" 
-        placeholder="123 Rue de Paris, 75000 Paris"
-        value={formData.propertyAddress}
-        onChange={(e) => updateFormData('propertyAddress', e.target.value)}
-      />
+      <input type="text" placeholder="123 Rue de Paris, 75000 Paris" value={formData.propertyAddress} onChange={(e) => updateFormData('propertyAddress', e.target.value)} />
 
       <label>Nom du locataire :</label>
-      <input 
-        type="text"
-        placeholder="Jean Dupont"
-        value={formData.tenantName}
-        onChange={(e) => updateFormData('tenantName', e.target.value)}
-      />
+      <input type="text" placeholder="Jean Dupont" value={formData.tenantName} onChange={(e) => updateFormData('tenantName', e.target.value)} />
 
       <label>Mode d'accès (optionnel) :</label>
-      <input 
-        type="text"
-        placeholder="Clé, Digicode, Interphone, etc."
-        value={formData.accessMode}
-        onChange={(e) => updateFormData('accessMode', e.target.value)}
-      />
+      <input type="text" placeholder="Clé, Digicode, etc." value={formData.accessMode} onChange={(e) => updateFormData('accessMode', e.target.value)} />
 
       <p><strong>Bailleur :</strong> RMV GESTION</p>
     </div>
@@ -100,16 +85,8 @@ function Step1({ formData, updateFormData }) {
 }
 
 function Step2({ formData, updateFormData }) {
-  const roomList = ['Entrée', 'Séjour', 'Salle à manger', 'Chambre 1', 'Chambre 2', 'Cuisine', 'Salle de bain', 'Salle d\'eau', 'Couloir', 'Remise', 'Cave', 'Balcon/Terrasse'];
-  const equipmentList = ['Portes', 'Fenêtres', 'Murs', 'Plafonds', 'Sols', 'Chauffage', 'Électricité', 'Plomberie', 'Mobilier', 'Peinture'];
-
-  const conditionStates = [
-    { value: 'TB', label: 'Très Bon (TB)' },
-    { value: 'B', label: 'Bon (B)' },
-    { value: 'M', label: 'Moyen (M)' },
-    { value: 'D', label: 'Défaillant (D)' },
-    { value: 'NV', label: 'Non visité (NV)' }
-  ];
+  const roomList = ['Entrée', 'Séjour', 'Cuisine', 'Chambre 1', 'Chambre 2', 'Salle de bain', 'Couloir'];
+  const equipmentList = ['Portes', 'Fenêtres', 'Murs', 'Plafonds', 'Sols', 'Chauffage', 'Électricité'];
 
   const toggleRoom = (room) => {
     const rooms = { ...formData.rooms };
@@ -160,11 +137,7 @@ function Step2({ formData, updateFormData }) {
       <div className="rooms-grid">
         {roomList.map(room => (
           <label key={room} className="room-checkbox">
-            <input
-              type="checkbox"
-              checked={!!formData.rooms[room]}
-              onChange={() => toggleRoom(room)}
-            />
+            <input type="checkbox" checked={!!formData.rooms[room]} onChange={() => toggleRoom(room)} />
             {room}
           </label>
         ))}
@@ -178,39 +151,28 @@ function Step2({ formData, updateFormData }) {
             {equipmentList.map(eq => (
               <div key={eq} className="equipment-item">
                 <label>{eq} :</label>
-                <select 
-                  value={formData.rooms[room].equipment[eq] || 'NV'}
-                  onChange={(e) => updateEquipment(room, eq, e.target.value)}
-                >
-                  {conditionStates.map(state => (
-                    <option key={state.value} value={state.value}>
-                      {state.label}
-                    </option>
-                  ))}
+                <select value={formData.rooms[room].equipment[eq] || 'NV'} onChange={(e) => updateEquipment(room, eq, e.target.value)}>
+                  <option value="TB">TB</option>
+                  <option value="B">B</option>
+                  <option value="M">M</option>
+                  <option value="D">D</option>
+                  <option value="NV">NV</option>
                 </select>
               </div>
             ))}
           </div>
 
           <label>Commentaires :</label>
-          <textarea
-            value={formData.rooms[room].comments}
-            onChange={(e) => updateComments(room, e.target.value)}
-            placeholder="Notes sur l'état de la pièce..."
-          />
+          <textarea value={formData.rooms[room].comments} onChange={(e) => updateComments(room, e.target.value)} placeholder="Notes..." />
 
-          <label>Photos de la pièce :</label>
-          <input 
-            type="file" 
-            accept="image/*"
-            onChange={(e) => addPhoto(room, e)}
-          />
+          <label>Photos :</label>
+          <input type="file" accept="image/*" onChange={(e) => addPhoto(room, e)} />
           
           {formData.rooms[room].photos && formData.rooms[room].photos.length > 0 && (
             <div className="photos-grid">
               {formData.rooms[room].photos.map((photo, idx) => (
                 <div key={idx} className="photo-item">
-                  <img src="/images/header.png" alt="" className="header-image" />
+                  <img src={photo} alt={`Photo ${idx}`} />
                   <button onClick={() => removePhoto(room, idx)}>✕</button>
                 </div>
               ))}
@@ -238,66 +200,35 @@ function Step3({ formData, updateFormData }) {
     }
   };
 
-  const removeKeysPhoto = () => {
-    updateFormData('keysPhoto', null);
-  };
-
   return (
     <div className="step">
       <h2>Étape 3 : Index et clés</h2>
       
       <div className="meter-section">
         <div>
-          <label>Index Électricité (kWh) :</label>
-          <input 
-            type="number"
-            value={formData.meterReadings.electricity}
-            onChange={(e) => handleMeterChange('electricity', e.target.value)}
-            placeholder="0"
-          />
+          <label>Électricité (kWh) :</label>
+          <input type="number" value={formData.meterReadings.electricity} onChange={(e) => handleMeterChange('electricity', e.target.value)} />
         </div>
-
         <div>
-          <label>Index Gaz (m³) :</label>
-          <input 
-            type="number"
-            value={formData.meterReadings.gas}
-            onChange={(e) => handleMeterChange('gas', e.target.value)}
-            placeholder="0"
-          />
+          <label>Gaz (m³) :</label>
+          <input type="number" value={formData.meterReadings.gas} onChange={(e) => handleMeterChange('gas', e.target.value)} />
         </div>
-
         <div>
-          <label>Index Eau (m³) :</label>
-          <input 
-            type="number"
-            value={formData.meterReadings.water}
-            onChange={(e) => handleMeterChange('water', e.target.value)}
-            placeholder="0"
-          />
+          <label>Eau (m³) :</label>
+          <input type="number" value={formData.meterReadings.water} onChange={(e) => handleMeterChange('water', e.target.value)} />
         </div>
       </div>
 
       <div className="keys-section">
         <h3>Photo des clés</h3>
-        <input 
-          type="file" 
-          accept="image/*"
-          onChange={(e) => addKeysPhoto(e)}
-        />
-        
-        {formData.keysPhoto && (
-          <div className="keys-photo">
-            <img src={formData.keysPhoto} alt="Clés" />
-            <button onClick={removeKeysPhoto}>Supprimer</button>
-          </div>
-        )}
+        <input type="file" accept="image/*" onChange={addKeysPhoto} />
+        {formData.keysPhoto && <div className="keys-photo"><img src={formData.keysPhoto} alt="Clés" /></div>}
       </div>
     </div>
   );
 }
 
-function Step4({ formData, updateFormData }) {
+function Step4({ formData }) {
   const signatureCanvasRef = useRef(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [pdfUrl, setPdfUrl] = useState(null);
@@ -326,112 +257,99 @@ function Step4({ formData, updateFormData }) {
 
   const stopDrawing = () => {
     setIsDrawing(false);
-    const canvas = signatureCanvasRef.current;
-    updateFormData('signature', canvas.toDataURL());
   };
 
   const clearSignature = () => {
     const canvas = signatureCanvasRef.current;
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    updateFormData('signature', null);
   };
 
-  const generatePDF = async () => {
+  const generatePDF = () => {
     const doc = new jsPDF();
-    let yPos = 10;
+    let yPos = 15;
 
-    try {
-      // Charger et ajouter l'image d'en-tête
-      const response = await fetch('/Screenshot 2026-07-04 225530_edited.png');
-      const blob = await response.blob();
-      const reader = new FileReader();
-      
-      reader.onload = (e) => {
-        const imgData = e.target.result;
-        doc.addImage(imgData, 'PNG', 10, yPos, 190, 30);
-        yPos += 40;
+    doc.setFontSize(16);
+    doc.setFont(undefined, 'bold');
+    doc.text('RMV GESTION - État des lieux', 10, yPos);
+    yPos += 15;
 
-        // Infos du bien
-        doc.setFontSize(12);
-        doc.setFont(undefined, 'bold');
-        doc.text('Informations du bien', 10, yPos);
-        yPos += 8;
-        doc.setFont(undefined, 'normal');
-        doc.setFontSize(10);
-        
-        doc.text(`Type d'inspection: ${formData.inspectionType === 'entry' ? 'Entrée' : 'Sortie'}`, 10, yPos);
-        yPos += 6;
-        doc.text(`Adresse: ${formData.propertyAddress}`, 10, yPos);
-        yPos += 6;
-        doc.text(`Locataire: ${formData.tenantName}`, 10, yPos);
-        yPos += 6;
-        if (formData.accessMode) {
-          doc.text(`Mode d'accès: ${formData.accessMode}`, 10, yPos);
-          yPos += 6;
-        }
-        doc.text('Bailleur: RMV GESTION', 10, yPos);
-        yPos += 12;
+    doc.setFont(undefined, 'normal');
+    doc.setFontSize(10);
+    doc.text(`Type: ${formData.inspectionType === 'entry' ? 'Entrée' : 'Sortie'}`, 10, yPos);
+    yPos += 6;
+    doc.text(`Adresse: ${formData.propertyAddress}`, 10, yPos);
+    yPos += 6;
+    doc.text(`Locataire: ${formData.tenantName}`, 10, yPos);
+    yPos += 6;
+    doc.text('Bailleur: RMV GESTION', 10, yPos);
+    yPos += 12;
 
-        doc.setFont(undefined, 'bold');
-        doc.text('Index', 10, yPos);
-        yPos += 8;
-        doc.setFont(undefined, 'normal');
-        doc.text(`Électricité: ${formData.meterReadings.electricity || 'N/A'} kWh`, 15, yPos);
-        yPos += 6;
-        doc.text(`Gaz: ${formData.meterReadings.gas || 'N/A'} m³`, 15, yPos);
-        yPos += 6;
-        doc.text(`Eau: ${formData.meterReadings.water || 'N/A'} m³`, 15, yPos);
-        yPos += 12;
+    doc.setFont(undefined, 'bold');
+    doc.text('Index', 10, yPos);
+    yPos += 8;
+    doc.setFont(undefined, 'normal');
+    doc.text(`Électricité: ${formData.meterReadings.electricity} kWh`, 15, yPos);
+    yPos += 6;
+    doc.text(`Gaz: ${formData.meterReadings.gas} m³`, 15, yPos);
+    yPos += 6;
+    doc.text(`Eau: ${formData.meterReadings.water} m³`, 15, yPos);
+    yPos += 12;
 
-        doc.setFont(undefined, 'bold');
-        doc.text('Pièces et équipements', 10, yPos);
-        yPos += 8;
-        doc.setFont(undefined, 'normal');
+    Object.keys(formData.rooms).forEach(room => {
+      if (yPos > 250) {
+        doc.addPage();
+        yPos = 10;
+      }
+      doc.setFont(undefined, 'bold');
+      doc.text(room, 10, yPos);
+      yPos += 6;
+      doc.setFont(undefined, 'normal');
+      Object.keys(formData.rooms[room].equipment).forEach(eq => {
+        doc.text(`${eq}: ${formData.rooms[room].equipment[eq]}`, 15, yPos);
+        yPos += 5;
+      });
+    });
 
-        Object.keys(formData.rooms).forEach(room => {
-          if (yPos > 250) {
-            doc.addPage();
-            yPos = 10;
-          }
-
-          doc.setFont(undefined, 'bold');
-          doc.text(room, 10, yPos);
-          yPos += 6;
-          doc.setFont(undefined, 'normal');
-
-          Object.keys(formData.rooms[room].equipment).forEach(eq => {
-            const state = formData.rooms[room].equipment[eq];
-            doc.text(`${eq}: ${state}`, 15, yPos);
-            yPos += 5;
-          });
-
-          if (formData.rooms[room].comments) {
-            doc.text(`Notes: ${formData.rooms[room].comments}`, 15, yPos);
-            yPos += 5;
-          }
-          yPos += 5;
-        });
-
-        if (formData.signature) {
-          if (yPos > 250) {
-            doc.addPage();
-            yPos = 20;
-          }
-          doc.setFont(undefined, 'bold');
-          doc.text('Signature', 10, yPos);
-          yPos += 12;
-          doc.addImage(formData.signature, 'PNG', 10, yPos, 50, 20);
-        }
-
-        const pdfBlob = doc.output('blob');
-        const url = URL.createObjectURL(pdfBlob);
-        setPdfUrl(url);
-      };
-      
-      reader.readAsDataURL(blob);
-    } catch (error) {
-      console.error('Erreur lors de la génération du PDF:', error);
-      alert('Erreur lors de la génération du PDF');
+    const signatureCanvas = signatureCanvasRef.current;
+    if (signatureCanvas) {
+      const signatureData = signatureCanvas.toDataURL();
+      if (yPos > 250) {
+        doc.addPage();
+        yPos = 10;
+      }
+      doc.text('Signature:', 10, yPos);
+      yPos += 12;
+      doc.addImage(signatureData, 'PNG', 10, yPos, 50, 20);
     }
+
+    const pdfBlob = doc.output('blob');
+    const url = URL.createObjectURL(pdfBlob);
+    setPdfUrl(url);
   };
+
+  return (
+    <div className="step">
+      <h2>Étape 4 : Signature et PDF</h2>
+      
+      <div className="signature-section">
+        <h3>Signature</h3>
+        <canvas ref={signatureCanvasRef} width={400} height={150} className="signature-canvas" onMouseDown={startDrawing} onMouseMove={draw} onMouseUp={stopDrawing} onMouseLeave={stopDrawing} />
+        <div className="signature-buttons">
+          <button onClick={clearSignature}>Effacer</button>
+          <button onClick={generatePDF} className="btn-primary">Générer PDF</button>
+        </div>
+      </div>
+
+      {pdfUrl && (
+        <div className="pdf-preview">
+          <h3>Aperçu</h3>
+          <iframe title="PDF Preview" src={pdfUrl} style={{ width: '100%', height: '600px', marginTop: '15px', border: '1px solid #ddd', borderRadius: '8px' }} />
+          <a href={pdfUrl} download="etat-des-lieux.pdf" style={{ marginTop: '20px', display: 'block' }}>
+            <button className="btn-primary">Télécharger</button>
+          </a>
+        </div>
+      )}
+    </div>
+  );
+}
