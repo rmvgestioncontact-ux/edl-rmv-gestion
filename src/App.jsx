@@ -295,6 +295,8 @@ function Step3({ formData, updateFormData }) {
       </div>
     </div>
   );
+}
+
 function Step4({ formData, updateFormData }) {
   const signatureCanvasRef = useRef(null);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -339,92 +341,81 @@ function Step4({ formData, updateFormData }) {
     const doc = new jsPDF();
     let yPos = 10;
 
-    // Ajouter l'image d'en-tête
-    const headerImg = new Image();
-    headerImg.src = '/images/header.png';
-    headerImg.onload = () => {
-      doc.addImage(headerImg, 'PNG', 10, yPos, 190, 30);
-      yPos += 40;
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.text('RMV GESTION - État des lieux', 10, yPos);
+    yPos += 15;
 
-      // Infos du bien
-      doc.setFontSize(12);
-      doc.setFont(undefined, 'bold');
-      doc.text('Informations du bien', 10, yPos);
-      yPos += 8;
-      doc.setFont(undefined, 'normal');
-      doc.setFontSize(10);
-      
-      doc.text(`Type d'inspection: ${formData.inspectionType === 'entry' ? 'Entrée' : 'Sortie'}`, 10, yPos);
+    doc.setFont(undefined, 'normal');
+    doc.setFontSize(10);
+    
+    doc.text(`Type d'inspection: ${formData.inspectionType === 'entry' ? 'Entrée' : 'Sortie'}`, 10, yPos);
+    yPos += 6;
+    doc.text(`Adresse: ${formData.propertyAddress}`, 10, yPos);
+    yPos += 6;
+    doc.text(`Locataire: ${formData.tenantName}`, 10, yPos);
+    yPos += 6;
+    if (formData.accessMode) {
+      doc.text(`Mode d'accès: ${formData.accessMode}`, 10, yPos);
       yPos += 6;
-      doc.text(`Adresse: ${formData.propertyAddress}`, 10, yPos);
-      yPos += 6;
-      doc.text(`Locataire: ${formData.tenantName}`, 10, yPos);
-      yPos += 6;
-      if (formData.accessMode) {
-        doc.text(`Mode d'accès: ${formData.accessMode}`, 10, yPos);
-        yPos += 6;
+    }
+    doc.text('Bailleur: RMV GESTION', 10, yPos);
+    yPos += 12;
+
+    doc.setFont(undefined, 'bold');
+    doc.text('Index', 10, yPos);
+    yPos += 8;
+    doc.setFont(undefined, 'normal');
+    doc.text(`Électricité: ${formData.meterReadings.electricity || 'N/A'} kWh`, 15, yPos);
+    yPos += 6;
+    doc.text(`Gaz: ${formData.meterReadings.gas || 'N/A'} m³`, 15, yPos);
+    yPos += 6;
+    doc.text(`Eau: ${formData.meterReadings.water || 'N/A'} m³`, 15, yPos);
+    yPos += 12;
+
+    doc.setFont(undefined, 'bold');
+    doc.text('Pièces et équipements', 10, yPos);
+    yPos += 8;
+    doc.setFont(undefined, 'normal');
+
+    Object.keys(formData.rooms).forEach(room => {
+      if (yPos > 250) {
+        doc.addPage();
+        yPos = 10;
       }
-      doc.text('Bailleur: RMV GESTION', 10, yPos);
-      yPos += 12;
 
-      // Index
       doc.setFont(undefined, 'bold');
-      doc.text('Index', 10, yPos);
-      yPos += 8;
-      doc.setFont(undefined, 'normal');
-      doc.text(`Électricité: ${formData.meterReadings.electricity || 'N/A'} kWh`, 15, yPos);
+      doc.text(room, 10, yPos);
       yPos += 6;
-      doc.text(`Gaz: ${formData.meterReadings.gas || 'N/A'} m³`, 15, yPos);
-      yPos += 6;
-      doc.text(`Eau: ${formData.meterReadings.water || 'N/A'} m³`, 15, yPos);
-      yPos += 12;
-
-      // Pièces et équipements
-      doc.setFont(undefined, 'bold');
-      doc.text('Pièces et équipements', 10, yPos);
-      yPos += 8;
       doc.setFont(undefined, 'normal');
 
-      Object.keys(formData.rooms).forEach(room => {
-        if (yPos > 250) {
-          doc.addPage();
-          yPos = 10;
-        }
-
-        doc.setFont(undefined, 'bold');
-        doc.text(room, 10, yPos);
-        yPos += 6;
-        doc.setFont(undefined, 'normal');
-
-        Object.keys(formData.rooms[room].equipment).forEach(eq => {
-          const state = formData.rooms[room].equipment[eq];
-          doc.text(`${eq}: ${state}`, 15, yPos);
-          yPos += 5;
-        });
-
-        if (formData.rooms[room].comments) {
-          doc.text(`Notes: ${formData.rooms[room].comments}`, 15, yPos);
-          yPos += 5;
-        }
+      Object.keys(formData.rooms[room].equipment).forEach(eq => {
+        const state = formData.rooms[room].equipment[eq];
+        doc.text(`${eq}: ${state}`, 15, yPos);
         yPos += 5;
       });
 
-      // Signature
-      if (formData.signature) {
-        if (yPos > 250) {
-          doc.addPage();
-          yPos = 20;
-        }
-        doc.setFont(undefined, 'bold');
-        doc.text('Signature', 10, yPos);
-        yPos += 12;
-        doc.addImage(formData.signature, 'PNG', 10, yPos, 50, 20);
+      if (formData.rooms[room].comments) {
+        doc.text(`Notes: ${formData.rooms[room].comments}`, 15, yPos);
+        yPos += 5;
       }
+      yPos += 5;
+    });
 
-      const pdfBlob = doc.output('blob');
-      const url = URL.createObjectURL(pdfBlob);
-      setPdfUrl(url);
-    };
+    if (formData.signature) {
+      if (yPos > 250) {
+        doc.addPage();
+        yPos = 20;
+      }
+      doc.setFont(undefined, 'bold');
+      doc.text('Signature', 10, yPos);
+      yPos += 12;
+      doc.addImage(formData.signature, 'PNG', 10, yPos, 50, 20);
+    }
+
+    const pdfBlob = doc.output('blob');
+    const url = URL.createObjectURL(pdfBlob);
+    setPdfUrl(url);
   };
 
   return (
@@ -433,7 +424,7 @@ function Step4({ formData, updateFormData }) {
       
       <div className="signature-section">
         <h3>Signature électronique</h3>
-        <p>Tracez votre signature ci-dessous (souris ou tactile)</p>
+        <p>Tracez votre signature ci-dessous</p>
         <canvas
           ref={signatureCanvasRef}
           width={400}
@@ -463,4 +454,4 @@ function Step4({ formData, updateFormData }) {
       )}
     </div>
   );
-}}
+}
