@@ -341,117 +341,97 @@ function Step4({ formData, updateFormData }) {
     const doc = new jsPDF();
     let yPos = 10;
 
-    doc.setFontSize(12);
-    doc.setFont(undefined, 'bold');
-    doc.text('RMV GESTION - État des lieux', 10, yPos);
-    yPos += 15;
-
-    doc.setFont(undefined, 'normal');
-    doc.setFontSize(10);
-    
-    doc.text(`Type d'inspection: ${formData.inspectionType === 'entry' ? 'Entrée' : 'Sortie'}`, 10, yPos);
-    yPos += 6;
-    doc.text(`Adresse: ${formData.propertyAddress}`, 10, yPos);
-    yPos += 6;
-    doc.text(`Locataire: ${formData.tenantName}`, 10, yPos);
-    yPos += 6;
-    if (formData.accessMode) {
-      doc.text(`Mode d'accès: ${formData.accessMode}`, 10, yPos);
-      yPos += 6;
-    }
-    doc.text('Bailleur: RMV GESTION', 10, yPos);
-    yPos += 12;
-
-    doc.setFont(undefined, 'bold');
-    doc.text('Index', 10, yPos);
-    yPos += 8;
-    doc.setFont(undefined, 'normal');
-    doc.text(`Électricité: ${formData.meterReadings.electricity || 'N/A'} kWh`, 15, yPos);
-    yPos += 6;
-    doc.text(`Gaz: ${formData.meterReadings.gas || 'N/A'} m³`, 15, yPos);
-    yPos += 6;
-    doc.text(`Eau: ${formData.meterReadings.water || 'N/A'} m³`, 15, yPos);
-    yPos += 12;
-
-    doc.setFont(undefined, 'bold');
-    doc.text('Pièces et équipements', 10, yPos);
-    yPos += 8;
-    doc.setFont(undefined, 'normal');
-
-    Object.keys(formData.rooms).forEach(room => {
-      if (yPos > 250) {
-        doc.addPage();
-        yPos = 10;
-      }
-
-      doc.setFont(undefined, 'bold');
-      doc.text(room, 10, yPos);
-      yPos += 6;
-      doc.setFont(undefined, 'normal');
-
-      Object.keys(formData.rooms[room].equipment).forEach(eq => {
-        const state = formData.rooms[room].equipment[eq];
-        doc.text(`${eq}: ${state}`, 15, yPos);
-        yPos += 5;
-      });
-
-      if (formData.rooms[room].comments) {
-        doc.text(`Notes: ${formData.rooms[room].comments}`, 15, yPos);
-        yPos += 5;
-      }
-      yPos += 5;
-    });
-
-    if (formData.signature) {
-      if (yPos > 250) {
-        doc.addPage();
-        yPos = 20;
-      }
-      doc.setFont(undefined, 'bold');
-      doc.text('Signature', 10, yPos);
-      yPos += 12;
-      doc.addImage(formData.signature, 'PNG', 10, yPos, 50, 20);
-    }
-
-    const pdfBlob = doc.output('blob');
-    const url = URL.createObjectURL(pdfBlob);
-    setPdfUrl(url);
-  };
-
-  return (
-    <div className="step">
-      <h2>Étape 4 : Signature et PDF</h2>
+    try {
+      // Charger et ajouter l'image d'en-tête
+      const response = await fetch('/Screenshot 2026-07-04 225530_edited.png');
+      const blob = await response.blob();
+      const reader = new FileReader();
       
-      <div className="signature-section">
-        <h3>Signature électronique</h3>
-        <p>Tracez votre signature ci-dessous</p>
-        <canvas
-          ref={signatureCanvasRef}
-          width={400}
-          height={150}
-          className="signature-canvas"
-          onMouseDown={startDrawing}
-          onMouseMove={draw}
-          onMouseUp={stopDrawing}
-          onMouseLeave={stopDrawing}
-        />
-        <div className="signature-buttons">
-          <button onClick={clearSignature}>Effacer la signature</button>
-          <button onClick={generatePDF} className="btn-primary">Générer le PDF</button>
-        </div>
-      </div>
+      reader.onload = (e) => {
+        const imgData = e.target.result;
+        doc.addImage(imgData, 'PNG', 10, yPos, 190, 30);
+        yPos += 40;
 
-      {pdfUrl && (
-        <div className="pdf-preview">
-          <h3>Aperçu du PDF</h3>
-          <iframe src={pdfUrl} title="PDF Preview" style={{ width: '100%', height: '600px', marginTop: '15px', border: '1px solid #ddd', borderRadius: '8px' }} />
-          <div style={{ marginTop: '20px' }}>
-            <a href={pdfUrl} download="etat-des-lieux.pdf">
-              <button className="btn-primary">📥 Télécharger le PDF</button>
-            </a>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
+        // Infos du bien
+        doc.setFontSize(12);
+        doc.setFont(undefined, 'bold');
+        doc.text('Informations du bien', 10, yPos);
+        yPos += 8;
+        doc.setFont(undefined, 'normal');
+        doc.setFontSize(10);
+        
+        doc.text(`Type d'inspection: ${formData.inspectionType === 'entry' ? 'Entrée' : 'Sortie'}`, 10, yPos);
+        yPos += 6;
+        doc.text(`Adresse: ${formData.propertyAddress}`, 10, yPos);
+        yPos += 6;
+        doc.text(`Locataire: ${formData.tenantName}`, 10, yPos);
+        yPos += 6;
+        if (formData.accessMode) {
+          doc.text(`Mode d'accès: ${formData.accessMode}`, 10, yPos);
+          yPos += 6;
+        }
+        doc.text('Bailleur: RMV GESTION', 10, yPos);
+        yPos += 12;
+
+        doc.setFont(undefined, 'bold');
+        doc.text('Index', 10, yPos);
+        yPos += 8;
+        doc.setFont(undefined, 'normal');
+        doc.text(`Électricité: ${formData.meterReadings.electricity || 'N/A'} kWh`, 15, yPos);
+        yPos += 6;
+        doc.text(`Gaz: ${formData.meterReadings.gas || 'N/A'} m³`, 15, yPos);
+        yPos += 6;
+        doc.text(`Eau: ${formData.meterReadings.water || 'N/A'} m³`, 15, yPos);
+        yPos += 12;
+
+        doc.setFont(undefined, 'bold');
+        doc.text('Pièces et équipements', 10, yPos);
+        yPos += 8;
+        doc.setFont(undefined, 'normal');
+
+        Object.keys(formData.rooms).forEach(room => {
+          if (yPos > 250) {
+            doc.addPage();
+            yPos = 10;
+          }
+
+          doc.setFont(undefined, 'bold');
+          doc.text(room, 10, yPos);
+          yPos += 6;
+          doc.setFont(undefined, 'normal');
+
+          Object.keys(formData.rooms[room].equipment).forEach(eq => {
+            const state = formData.rooms[room].equipment[eq];
+            doc.text(`${eq}: ${state}`, 15, yPos);
+            yPos += 5;
+          });
+
+          if (formData.rooms[room].comments) {
+            doc.text(`Notes: ${formData.rooms[room].comments}`, 15, yPos);
+            yPos += 5;
+          }
+          yPos += 5;
+        });
+
+        if (formData.signature) {
+          if (yPos > 250) {
+            doc.addPage();
+            yPos = 20;
+          }
+          doc.setFont(undefined, 'bold');
+          doc.text('Signature', 10, yPos);
+          yPos += 12;
+          doc.addImage(formData.signature, 'PNG', 10, yPos, 50, 20);
+        }
+
+        const pdfBlob = doc.output('blob');
+        const url = URL.createObjectURL(pdfBlob);
+        setPdfUrl(url);
+      };
+      
+      reader.readAsDataURL(blob);
+    } catch (error) {
+      console.error('Erreur lors de la génération du PDF:', error);
+      alert('Erreur lors de la génération du PDF');
+    }
+  };
