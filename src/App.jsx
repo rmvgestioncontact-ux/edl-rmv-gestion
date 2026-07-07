@@ -210,7 +210,7 @@ function Step2({ formData, updateFormData }) {
             <div className="photos-grid">
               {formData.rooms[room].photos.map((photo, idx) => (
                 <div key={idx} className="photo-item">
-                  <img src={photo} alt={`Photo ${idx + 1}`} />
+                  <img src="/images/header.png" className="header-image" />
                   <button onClick={() => removePhoto(room, idx)}>✕</button>
                 </div>
               ))}
@@ -444,7 +444,7 @@ function Step4({ formData, updateFormData }) {
       {pdfUrl && (
         <div className="pdf-preview">
           <h3>Aperçu du PDF</h3>
-          <iframe src={pdfUrl} style={{ width: '100%', height: '600px', marginTop: '15px', border: '1px solid #ddd', borderRadius: '8px' }} />
+          <iframe src={pdfUrl} title="PDF Preview" style={{ width: '100%', height: '600px', marginTop: '15px', border: '1px solid #ddd', borderRadius: '8px' }} />
           <div style={{ marginTop: '20px' }}>
             <a href={pdfUrl} download="etat-des-lieux.pdf">
               <button className="btn-primary">📥 Télécharger le PDF</button>
