@@ -29,7 +29,7 @@ export default function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <img src="/images/header.png" alt="RMV GESTION" className="header-image" />
+        <img src="/Screenshot 2026-07-04 225530_edited.png" alt="RMV GESTION" className="header-image" />
       </header>
       
       <nav className="step-nav">
