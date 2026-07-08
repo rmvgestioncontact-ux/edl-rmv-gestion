@@ -34,11 +34,7 @@ export default function App() {
       
       <nav className="step-nav">
         {[1, 2, 3, 4].map(step => (
-          <button
-            key={step}
-            className={`step-btn ${currentStep === step ? 'active' : ''}`}
-            onClick={() => setCurrentStep(step)}
-          >
+          <button key={step} className={`step-btn ${currentStep === step ? 'active' : ''}`} onClick={() => setCurrentStep(step)}>
             Étape {step}
           </button>
         ))}
@@ -48,7 +44,7 @@ export default function App() {
         {currentStep === 1 && <Step1 formData={formData} updateFormData={updateFormData} />}
         {currentStep === 2 && <Step2 formData={formData} updateFormData={updateFormData} />}
         {currentStep === 3 && <Step3 formData={formData} updateFormData={updateFormData} />}
-        {currentStep === 4 && <Step4 formData={formData} updateFormData={updateFormData} />}
+        {currentStep === 4 && <Step4 formData={formData} />}
       </main>
 
       <div className="step-actions">
@@ -87,6 +83,7 @@ function Step1({ formData, updateFormData }) {
 function Step2({ formData, updateFormData }) {
   const roomList = ['Entrée', 'Séjour', 'Cuisine', 'Chambre 1', 'Chambre 2', 'Salle de bain', 'Couloir'];
   const equipmentList = ['Portes', 'Fenêtres', 'Murs', 'Plafonds', 'Sols', 'Chauffage', 'Électricité'];
+  const conditions = ['TB', 'B', 'M', 'D', 'NV'];
 
   const toggleRoom = (room) => {
     const rooms = { ...formData.rooms };
@@ -124,9 +121,9 @@ function Step2({ formData, updateFormData }) {
     }
   };
 
-  const removePhoto = (room, photoIndex) => {
+  const removePhoto = (room, idx) => {
     const rooms = { ...formData.rooms };
-    rooms[room].photos.splice(photoIndex, 1);
+    rooms[room].photos.splice(idx, 1);
     updateFormData('rooms', rooms);
   };
 
@@ -152,11 +149,7 @@ function Step2({ formData, updateFormData }) {
               <div key={eq} className="equipment-item">
                 <label>{eq} :</label>
                 <select value={formData.rooms[room].equipment[eq] || 'NV'} onChange={(e) => updateEquipment(room, eq, e.target.value)}>
-                  <option value="TB">TB</option>
-                  <option value="B">B</option>
-                  <option value="M">M</option>
-                  <option value="D">D</option>
-                  <option value="NV">NV</option>
+                  {conditions.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
             ))}
@@ -200,6 +193,10 @@ function Step3({ formData, updateFormData }) {
     }
   };
 
+  const removeKeysPhoto = () => {
+    updateFormData('keysPhoto', null);
+  };
+
   return (
     <div className="step">
       <h2>Étape 3 : Index et clés</h2>
@@ -222,7 +219,12 @@ function Step3({ formData, updateFormData }) {
       <div className="keys-section">
         <h3>Photo des clés</h3>
         <input type="file" accept="image/*" onChange={addKeysPhoto} />
-        {formData.keysPhoto && <div className="keys-photo"><img src={formData.keysPhoto} alt="Clés" /></div>}
+        {formData.keysPhoto && (
+          <div className="keys-photo">
+            <img src={formData.keysPhoto} alt="Clés" />
+            <button onClick={removeKeysPhoto}>Supprimer</button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -237,95 +239,124 @@ function Step4({ formData }) {
     setIsDrawing(true);
     const canvas = signatureCanvasRef.current;
     const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
     const ctx = canvas.getContext('2d');
     ctx.beginPath();
-    ctx.moveTo(x, y);
+    ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
   };
 
   const draw = (e) => {
     if (!isDrawing) return;
     const canvas = signatureCanvasRef.current;
     const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
     const ctx = canvas.getContext('2d');
-    ctx.lineTo(x, y);
+    ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
     ctx.stroke();
   };
 
-  const stopDrawing = () => {
-    setIsDrawing(false);
-  };
+  const stopDrawing = () => setIsDrawing(false);
 
   const clearSignature = () => {
     const canvas = signatureCanvasRef.current;
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
   };
 
-  const generatePDF = () => {
+  const generatePDF = async () => {
     const doc = new jsPDF();
-    let yPos = 15;
+    let yPos = 10;
 
-    doc.setFontSize(16);
-    doc.setFont(undefined, 'bold');
-    doc.text('RMV GESTION - État des lieux', 10, yPos);
-    yPos += 15;
+    try {
+      const headerResponse = await fetch('/Screenshot 2026-07-04 225530_edited.png');
+      const headerBlob = await headerResponse.blob();
+      const headerReader = new FileReader();
 
-    doc.setFont(undefined, 'normal');
-    doc.setFontSize(10);
-    doc.text(`Type: ${formData.inspectionType === 'entry' ? 'Entrée' : 'Sortie'}`, 10, yPos);
-    yPos += 6;
-    doc.text(`Adresse: ${formData.propertyAddress}`, 10, yPos);
-    yPos += 6;
-    doc.text(`Locataire: ${formData.tenantName}`, 10, yPos);
-    yPos += 6;
-    doc.text('Bailleur: RMV GESTION', 10, yPos);
-    yPos += 12;
+      headerReader.onload = () => {
+        doc.addImage(headerReader.result, 'PNG', 10, yPos, 190, 30);
+        yPos += 40;
 
-    doc.setFont(undefined, 'bold');
-    doc.text('Index', 10, yPos);
-    yPos += 8;
-    doc.setFont(undefined, 'normal');
-    doc.text(`Électricité: ${formData.meterReadings.electricity} kWh`, 15, yPos);
-    yPos += 6;
-    doc.text(`Gaz: ${formData.meterReadings.gas} m³`, 15, yPos);
-    yPos += 6;
-    doc.text(`Eau: ${formData.meterReadings.water} m³`, 15, yPos);
-    yPos += 12;
+        doc.setFontSize(11);
+        doc.setFont(undefined, 'bold');
+        doc.text('État des lieux', 10, yPos);
+        yPos += 10;
 
-    Object.keys(formData.rooms).forEach(room => {
-      if (yPos > 250) {
-        doc.addPage();
-        yPos = 10;
-      }
-      doc.setFont(undefined, 'bold');
-      doc.text(room, 10, yPos);
-      yPos += 6;
-      doc.setFont(undefined, 'normal');
-      Object.keys(formData.rooms[room].equipment).forEach(eq => {
-        doc.text(`${eq}: ${formData.rooms[room].equipment[eq]}`, 15, yPos);
+        doc.setFont(undefined, 'normal');
+        doc.setFontSize(10);
+        doc.text(`Type: ${formData.inspectionType === 'entry' ? 'Entrée' : 'Sortie'}`, 10, yPos);
+        yPos += 6;
+        doc.text(`Adresse: ${formData.propertyAddress}`, 10, yPos);
+        yPos += 6;
+        doc.text(`Locataire: ${formData.tenantName}`, 10, yPos);
+        yPos += 6;
+        doc.text('Bailleur: RMV GESTION', 10, yPos);
+        yPos += 12;
+
+        doc.setFont(undefined, 'bold');
+        doc.text('Index', 10, yPos);
+        yPos += 8;
+        doc.setFont(undefined, 'normal');
+        doc.text(`Électricité: ${formData.meterReadings.electricity || 'N/A'} kWh`, 15, yPos);
         yPos += 5;
-      });
-    });
+        doc.text(`Gaz: ${formData.meterReadings.gas || 'N/A'} m³`, 15, yPos);
+        yPos += 5;
+        doc.text(`Eau: ${formData.meterReadings.water || 'N/A'} m³`, 15, yPos);
+        yPos += 12;
 
-    const signatureCanvas = signatureCanvasRef.current;
-    if (signatureCanvas) {
-      const signatureData = signatureCanvas.toDataURL();
-      if (yPos > 250) {
-        doc.addPage();
-        yPos = 10;
-      }
-      doc.text('Signature:', 10, yPos);
-      yPos += 12;
-      doc.addImage(signatureData, 'PNG', 10, yPos, 50, 20);
+        doc.setFont(undefined, 'bold');
+        doc.text('Pièces et équipements', 10, yPos);
+        yPos += 8;
+
+        Object.keys(formData.rooms).forEach(room => {
+          if (yPos > 250) {
+            doc.addPage();
+            yPos = 10;
+          }
+          doc.setFont(undefined, 'bold');
+          doc.text(room, 10, yPos);
+          yPos += 6;
+          doc.setFont(undefined, 'normal');
+
+          Object.keys(formData.rooms[room].equipment).forEach(eq => {
+            doc.text(`${eq}: ${formData.rooms[room].equipment[eq]}`, 15, yPos);
+            yPos += 5;
+          });
+
+          if (formData.rooms[room].comments) {
+            doc.text(`Notes: ${formData.rooms[room].comments}`, 15, yPos);
+            yPos += 5;
+          }
+
+          if (formData.rooms[room].photos && formData.rooms[room].photos[0]) {
+            if (yPos > 240) {
+              doc.addPage();
+              yPos = 10;
+            }
+            doc.addImage(formData.rooms[room].photos[0], 'PNG', 15, yPos, 40, 30);
+            yPos += 35;
+          }
+
+          yPos += 5;
+        });
+
+        const signatureCanvas = signatureCanvasRef.current;
+        if (signatureCanvas && signatureCanvas.toDataURL() !== 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==') {
+          if (yPos > 250) {
+            doc.addPage();
+            yPos = 10;
+          }
+          doc.setFont(undefined, 'bold');
+          doc.text('Signature', 10, yPos);
+          yPos += 12;
+          doc.addImage(signatureCanvas.toDataURL(), 'PNG', 10, yPos, 50, 20);
+        }
+
+        const pdfBlob = doc.output('blob');
+        const url = URL.createObjectURL(pdfBlob);
+        setPdfUrl(url);
+      };
+
+      headerReader.readAsDataURL(headerBlob);
+    } catch (error) {
+      alert('Erreur lors de la génération du PDF');
     }
-
-    const pdfBlob = doc.output('blob');
-    const url = URL.createObjectURL(pdfBlob);
-    setPdfUrl(url);
   };
 
   return (
@@ -333,7 +364,7 @@ function Step4({ formData }) {
       <h2>Étape 4 : Signature et PDF</h2>
       
       <div className="signature-section">
-        <h3>Signature</h3>
+        <h3>Signature électronique</h3>
         <canvas ref={signatureCanvasRef} width={400} height={150} className="signature-canvas" onMouseDown={startDrawing} onMouseMove={draw} onMouseUp={stopDrawing} onMouseLeave={stopDrawing} />
         <div className="signature-buttons">
           <button onClick={clearSignature}>Effacer</button>
@@ -343,10 +374,10 @@ function Step4({ formData }) {
 
       {pdfUrl && (
         <div className="pdf-preview">
-          <h3>Aperçu</h3>
-          <iframe title="PDF Preview" src={pdfUrl} style={{ width: '100%', height: '600px', marginTop: '15px', border: '1px solid #ddd', borderRadius: '8px' }} />
+          <h3>Aperçu du PDF</h3>
+          <iframe title="PDF Preview" src={pdfUrl} style={{ width: '100%', height: '600px', marginTop: '15px' }} />
           <a href={pdfUrl} download="etat-des-lieux.pdf" style={{ marginTop: '20px', display: 'block' }}>
-            <button className="btn-primary">Télécharger</button>
+            <button className="btn-primary">📥 Télécharger le PDF</button>
           </a>
         </div>
       )}
