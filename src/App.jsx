@@ -29,7 +29,7 @@ export default function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <img src="/Screenshot 2026-07-04 225530_edited.png" className="header-image" />
+        <img src="/Screenshot 2026-07-04 225530_edited.png" alt="" className="header-image" />
       </header>
       
       <nav className="step-nav">
@@ -165,7 +165,7 @@ function Step2({ formData, updateFormData }) {
             <div className="photos-grid">
               {formData.rooms[room].photos.map((photo, idx) => (
                 <div key={idx} className="photo-item">
-                  <img src={photo} alt={`Photo ${idx}`} />
+                  doc.addImage(headerReader.result, 'PNG', 10, yPos, 190, 30);
                   <button onClick={() => removePhoto(room, idx)}>✕</button>
                 </div>
               ))}
